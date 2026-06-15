@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carrefour Mantenimiento - Sistema de Evaluación y Fichas</title>
+    <style>
+        :root {
+            --azul-carrefour: #00387b;
+            --rojo-carrefour: #bb1e10;
+            --azul-claro: #f4f7fb;
+            --gris-borde: #e2e8f0;
+            --texto-principal: #1e293b;
+            --texto-secundario: #64748b;
+            --verde-exito: #10b981;
+            --verde-whatsapp: #25d366;
+            --amarillo-ficha: #f59e0b;
+            --blanco: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f1f5f9;
+            color: var(--texto-principal);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .contenedor {
+            background: var(--blanco);
+            border-radius: 12px;
+            max-width: 700px;
+            width: 100%;
+            box-shadow: 0 10px 30px rgba(0, 56, 123, 0.15);
+            border-top: 8px solid var(--azul-carrefour);
+            overflow: hidden;
+        }
+
+        /* Cabecera */
+        .header-carrefour {
+            background-color: var(--azul-claro);
+            padding: 20px 30px;
+            border-bottom: 1px solid var(--gris-borde);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo-c {
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(135deg, var(--azul-carrefour) 50%, var(--rojo-carrefour) 50%);
+            border-radius: 5px;
+            position: relative;
+        }
+        .logo-c::after {
+            content: '';
+            position: absolute;
+            top: 7px;
+            left: 7px;
+            width: 16px;
+            height: 16px;
+            background-color: var(--azul-claro);
+            border-radius: 2px;
+        }
+
+        .tag-mantenimiento {
+            font-size: 0.75rem;
+            background: var(--azul-carrefour);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .cuerpo { padding: 30px; }
+
+        h1 { color: var(--azul-carrefour); font-size: 1.5rem; margin-bottom: 10px; }
+        h2 { color: var(--texto-secundario); font-size: 0.95rem; margin-bottom: 25px; font-weight: normal; }
+
+        /* Métricas */
+        .panel-metricas {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .card-dato {
+            background: #f8fafc;
+            border: 1px solid var(--gris-borde);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--texto-secundario);
+        }
+
+        .card-dato span {
+            display: block;
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--azul-carrefour);
+            margin-top: 5px;
+        }
+
+        .vidas { color: var(--rojo-carrefour) !important; }
+        .fichas-color { color: var(--amarillo-ficha) !important; }
+
+        .barra-container {
+            background: #e2e8f0;
+            height: 8px;
+            border-radius: 4px;
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+
+        .barra-valor {
+            background: var(--azul-carrefour);
+            width: 0%;
+            height: 100%;
+            transition: width 0.4s;
+        }
+
+        .pregunta-box { font-size: 1.15rem; font-weight: 600; margin-bottom: 20px; line-height: 1.4; }
+
+        .opciones-lista { display: flex; flex-direction: column; gap: 10px; }
+
+        .btn-opcion {
+            background: white;
+            border: 1px solid #cbd5e1;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: left;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.95rem;
+        }
+
+        .btn-opcion:hover:not(:disabled) { background: #f1f5f9; border-color: var(--azul-carrefour); }
+
+        .btn-opcion.correcta { background: #d1fae5 !important; border-color: var(--verde-exito) !important; color: #065f46; font-weight: bold; }
+        .btn-opcion.incorrecta { background: #fee2e2 !important; border-color: var(--rojo-carrefour) !important; color: #991b1b; }
+
+        .alerta {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+            font-size: 0.9rem;
+            border-left: 4px solid var(--azul-carrefour);
+            background: #f8fafc;
+        }
+
+        .btn-accion {
+            width: 100%;
+            padding: 15px;
+            background: var(--azul-carrefour);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .btn-principal {
+            padding: 15px 30px;
+            background: var(--azul-carrefour);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+            margin: 5px;
+        }
+
+        .btn-whatsapp {
+            padding: 15px 30px;
+            background: var(--verde-whatsapp);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+            margin: 5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-whatsapp:hover {
+            background: #1ebd56;
+        }
+
+        .btn-secundario {
+            padding: 15px 30px;
+            background: #cbd5e1;
+            color: var(--texto-principal);
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+            margin: 5px;
+        }
+
+        .pantalla { text-align: center; }
+
+        /* Estilos de la tabla de posiciones */
+        .tabla-ranking {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 0.95rem;
+        }
+
+        .tabla-ranking th, .tabla-ranking td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--gris-borde);
+        }
+
+        .tabla-ranking th {
+            background-color: var(--azul-claro);
+            color: var(--azul-carrefour);
+        }
+
+        /* Input de Registro */
+        .input-registro {
+            padding: 12px;
+            width: 80%;
+            max-width: 300px;
+            border: 2px solid var(--gris-borde);
+            border-radius: 6px;
+            font-size: 1rem;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .input-registro:focus {
+            border-color: var(--azul-carrefour);
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="contenedor">
+    <div class="header-carrefour">
+        <div style="display: flex; align-items: center; gap: 10px; color: var(--azul-carrefour); font-weight: bold;">
+            <div class="logo-c"></div> Carrefour
+        </div>
+        <div class="tag-mantenimiento">Mantenimiento</div>
+    </div>
+
+    <div class="cuerpo">
+        <div id="inicio" class="pantalla">
+            <h1>Certificación de Refrigeración</h1>
+            <h2>Evaluación de Competencias Técnicas y Fichas de Incentivo</h2>
+            <p style="margin-bottom: 25px; color: var(--texto-secundario);">Respondé correctamente para acumular Fichas de Mantenimiento canjeables.</p>
+            <button class="btn-principal" onclick="comenzar()">Iniciar Evaluación</button>
+            <button class="btn-secundario" onclick="verRanking()">Cuadro de Honor 🏆</button>
+        </div>
+
+        <div id="juego" style="display: none;">
+            <h1 id="txt-nivel" style="font-size: 1.2rem;">Nivel 1</h1>
+            <h2 id="txt-modulo">Cargando módulo...</h2>
+
+            <div class="panel-metricas">
+                <div class="card-dato">Pregunta<span id="dato-pregunta">1/5</span></div>
+                <div class="card-dato">Fichas Ganadas<span id="dato-puntos" class="fichas-color">0 🪙</span></div>
+                <div class="card-dato">Margen de Error<span id="dato-vidas" class="vidas">❤❤❤</span></div>
+            </div>
+
+            <div class="barra-container">
+                <div id="barra" class="barra-valor"></div>
+            </div>
+
+            <div id="txt-pregunta" class="pregunta-box"></div>
+            <div id="lista-opciones" class="opciones-lista"></div>
+
+            <div id="area-alerta" class="alerta"></div>
+            <button id="btn-next" class="btn-accion" onclick="proxima()">Continuar</button>
+        </div>
+
+        <div id="pantalla-registro" class="pantalla" style="display: none;">
+            <h1>Auditoría Completada</h1>
+            <p style="margin: 15px 0; color: var(--texto-secundario);">Ingresá tu nombre para registrar tus fichas en la base de datos de la sucursal.</p>
+            <input type="text" id="nombre-tecnico" class="input-registro" placeholder="Nombre del Técnico" maxlength="20"><br>
+            <button class="btn-principal" onclick="guardarPuntaje()">Guardar y Ver Resultados</button>
+        </div>
+
+        <div id="final" class="pantalla" style="display: none;">
+            <h1 id="final-titulo">Auditoría Finalizada</h1>
+            <div id="final-rango" style="font-size: 1.4rem; font-weight: 800; color: var(--azul-carrefour); margin: 15px 0;"></div>
+            <p id="final-msj" style="color: var(--texto-secundario); margin-bottom: 25px;"></p>
+            
+            <div style="background: var(--azul-claro); padding: 15px; border-radius: 8px; margin-bottom: 25px; border: 1px solid var(--gris-borde);">
+                <p style="font-size: 1.1rem;">Total Fichas Acumuladas:</p>
+                <span id="final-puntos" style="font-size: 2rem; font-weight: bold; color: var(--amarillo-ficha);">0 🪙</span>
+                <p id="bono-texto" style="font-size: 0.85rem; color: var(--verde-exito); font-weight: bold; margin-top: 5px;"></p>
+            </div>
+
+            <button class="btn-whatsapp" onclick="enviarWhatsApp()">Enviar Reporte por WhatsApp 💬</button>
+            <button class="btn-secundario" onclick="location.reload()">Menú Principal</button>
+        </div>
+
+        <div id="ranking" class="pantalla" style="display: none;">
+            <h1>Cuadro de Honor 🏆</h1>
+            <h2>Historial de Técnicos de la Sucursal</h2>
+            <div style="max-height: 250px; overflow-y: auto;">
+                <table class="tabla-ranking">
+                    <thead>
+                        <tr>
+                            <th>Técnico</th>
+                            <th>Rango Alcanzado</th>
+                            <th>Fichas 🪙</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-cuerpo">
+                        </tbody>
+                </table>
+            </div>
+            <button class="btn-principal" style="margin-top: 25px;" onclick="location.reload()">Volver</button>
+            <button class="btn-secundario" style="margin-top: 25px; background: #fee2e2; color: var(--rojo-carrefour);" onclick="borrarHistorial()">Borrar Historial</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Tu número ya configurado correctamente con código de país
+    const MI_TELEFONO = "5491137582285"; 
+
+    // Banco de preguntas exacto
+    const DATA = [
+        { n: 1, m: "Módulo 1: Conceptos Básicos", q: "¿Qué se entiende por refrigeración?", r: "Es el proceso de reducir la temperatura de un cuerpo o de un espacio determinado, lo cual consiste en extraerle calor hasta que su temperatura sea inferior a la del ambiente.", a: ["Es inyectar aire frío generado mecánicamente para desplazar la presión.", "Es un proceso químico donde los gases congelan de forma inmediata.", "Es mantener la temperatura estable mediante ventilación forzada."] },
+        { n: 1, m: "Módulo 1: Conceptos Básicos", q: "¿Cuál es la diferencia entre el calor sensible y el calor latente?", r: "El calor sensible es el que puede sentirse y medirse al cambiar la temperatura; el latente es el necesario para cambiar el estado físico sin variar la temperatura.", a: ["El sensible cambia el estado físico y el latente altera la presión interna.", "El sensible se mide en PSI y el latente en frigorías únicamente.", "No hay diferencia real entre ambos términos."] },
+        { n: 1, m: "Módulo 1: Conceptos Básicos", q: "¿Cuáles son las tres maneras en que se transmite el calor?", r: "Mediante radiación, convección y conducción.", a: ["Por compresión, expansión y evaporación.", "Por inducción, magnetismo y resistencia.", "Por diferencia de presiones y vacío."] },
+        { n: 1, m: "Módulo 1: Conceptos Básicos", q: "¿Para qué sirven los manómetros?", r: "Para medir presiones; indican la diferencia entre la presión interna del tubo y la presión exterior.", a: ["Para medir la temperatura exacta de los caños de cobre.", "Para medir el caudal de refrigerante por minuto.", "Para medir la resistencia de los bobinados."] },
+        { n: 1, m: "Módulo 1: Conceptos Básicos", q: "¿Cómo funciona el sistema por compresión?", r: "El refrigerante absorbe calor en el evaporador, el compresor aspira esos vapores y los envía al condensador para volverlos líquido.", a: ["El compresor inyecta calor al evaporador para derretir la escarcha.", "El capilar comprime el líquido para enfriarlo y enviarlo al motor.", "Abre el circuito para que el gas escape a la atmósfera."] },
+        { n: 1, m: "Módulo 4: Electricidad", q: "¿A qué se le llama corriente eléctrica?", r: "Al desplazamiento de electrones libres a través de un conductor, de un potencial negativo a uno positivo.", a: ["A la acumulación de energía en un capacitor.", "Al bloqueo de un rotor por alta temperatura.", "Al magnetismo de un transformador."] },
+        { n: 1, m: "Módulo 4: Electricidad", q: "¿De qué depende la resistencia eléctrica?", r: "Depende del material, siendo mayor cuanto menor sea la sección y mayor sea su longitud.", a: ["De la cantidad de microfaradios del capacitor.", "Es mayor cuanto más grueso sea el cable.", "Del tipo de gas refrigerante del circuito."] },
+        { n: 1, m: "Módulo 4: Electricidad", q: "¿Qué establece la Ley de Ohm?", r: "Que la intensidad es proporcional a la tensión eléctrica, relacionando tensión, corriente y resistencia.", a: ["Que la presión de alta es proporcional a la temperatura.", "Permite calcular los microfaradios de arranque.", "Que la resistencia baja si sube la temperatura."] },
+        { n: 1, m: "Módulo 4: Electricidad", q: "¿Diferencia entre corriente continua y alterna?", r: "La continua mantiene un sentido y valor constante; la alterna varía su valor e invierte su sentido periódicamente.", a: ["La continua se usa en motores y la alterna en placas.", "La continua invierte el sentido y la alterna es fija.", "La continua no genera calor y la alterna sí."] },
+        { n: 1, m: "Módulo 4: Electricidad", q: "¿Para qué sirve un capacitor?", r: "Para almacenar cargas eléctricas como diferencia de potencial entre dos superficies aisladas.", a: ["Para regular la temperatura del compresor.", "Para reducir la tensión de 220V a 12V.", "Para disipar el calor del gas de succión."] },
+        
+        { n: 2, m: "Módulo 2: Componentes", q: "¿Función del evaporador?", r: "Lograr que el líquido se evapore, absorbiendo el calor del gabinete o cámara.", a: ["Licuar el gas caliente para enviarlo al capilar.", "Succionar vapores para proteger el bobinado.", "Elevar la presión para congelar alimentos."] },
+        { n: 2, m: "Módulo 2: Componentes", q: "¿Tipos de evaporadores?", r: "Inundado, seco, semi inundado y de aire forzado.", a: ["Pistón, rotativo, scroll y centrífugo.", "Alta presión, baja presión y capilar.", "Cobre, aluminio, hierro y acero."] },
+        { n: 2, m: "Módulo 2: Componentes", q: "¿Tarea del compresor?", r: "Succionar el refrigerante gasificado del evaporador, comprimirlo y enviarlo al condensador.", a: ["Expandir el líquido para bajar la presión.", "Almacenar líquido para proteger el evaporador.", "Enfriar vapores mediante convección."] },
+        { n: 2, m: "Módulo 2: Componentes", q: "¿Succión en compresor a pistón?", r: "Cuando el pistón va hacia abajo, crea baja presión y permite el ingreso de gas.", a: ["Cuando el pistón sube y comprime el gas.", "Por la inducción magnética del arranque.", "Cuando el termostato cierra los contactos."] },
+        { n: 2, m: "Módulo 2: Componentes", q: "¿Trabajo del condensador?", r: "Cede calor del gas al aire o agua para transformarlo de nuevo en líquido.", a: ["Absorbe calor para evaporar gotas de líquido.", "Regula el paso de gas a la baja presión.", "Almacena carga eléctrica para el arranque."] },
+        { n: 2, m: "Módulo 3: Expansión", q: "¿Qué es un elemento de expansión?", r: "Sistema que regula el paso de líquido al evaporador, generando una caída brusca de presión.", a: ["Dispositivo que aumenta la presión del gas caliente.", "Relé que amplía la sección del cable del motor.", "Caño de succión que une evaporador y cárter."] },
+        { n: 2, m: "Módulo 3: Expansión", q: "¿Función de válvula termostática?", r: "Regula el suministro basándose en el sobrecalentamiento a la salida del evaporador.", a: ["Mantiene fija la presión de alta siempre.", "Corta la energía al llegar al punto de congelación.", "Equilibra presiones en el tiempo de parada."] },
+        { n: 2, m: "Módulo 3: Expansión", q: "¿Ventaja del tubo capilar?", r: "Bajo costo, sin partes móviles, menos refrigerante y equilibra presiones en parada.", a: ["Permite ajustar el sobrecalentamiento manual.", "Soporta grandes caudales en sistemas industriales.", "Aísla el ruido eléctrico del motor."] },
+        { n: 2, m: "Módulo 3: Expansión", q: "¿Uso de válvulas de flotador?", r: "En evaporadores inundados para regular el nivel de líquido.", a: ["En la descarga de compresores herméticos.", "En la entrada del condensador para purgas.", "En filtros deshidratadores familiares."] },
+        { n: 2, m: "Módulo 3: Expansión", q: "¿Función de termostatos?", r: "Controles por temperatura que abren o cierran el circuito eléctrico del motor.", a: ["Miden presiones en manómetros de baja.", "Protegen mecánicamente al pistón.", "Regulan el diámetro del capilar."] },
+
+        { n: 3, m: "Módulo 5: Motores", q: "¿Qué es inducción electromagnética?", r: "Obtención de corriente por un conductor en un campo magnético variable.", a: ["Calentamiento de placas de un capacitor.", "Interrupción por baja tensión térmica.", "Pérdida de potencia por desgaste de bujes."] },
+        { n: 3, m: "Módulo 5: Motores", q: "¿Uso de transformadores?", r: "Transferir potencia reduciendo o elevando tensión e intensidad.", a: ["Transformar calor sensible en latente.", "Convertir alterna en continua pura.", "Comandar corrientes para proteger termostatos."] },
+        { n: 3, m: "Módulo 5: Motores", q: "¿Por qué bobinado de arranque?", r: "Da la fuerza inicial y funciona hasta alcanzar el 75% de velocidad.", a: ["Para disipar calor cuando el rotor se bloquea.", "Reduce el consumo de microfaradios.", "Evita que actúe el contactor por exceso."] },
+        { n: 3, m: "Módulo 5: Motores", q: "¿Protector térmico?", r: "Abre el circuito ante exceso de calor, baja tensión o bloqueo de rotor.", a: ["Regula el encendido según la temperatura.", "Almacena corriente para asistir al arranque.", "Conmuta marcha y arranque."] },
+        { n: 3, m: "Módulo 5: Motores", q: "¿Qué son los contactores?", r: "Interruptores electromagnéticos para comandar altas corrientes del motor.", a: ["Tuberías de cobre para alta presión.", "Aislantes de transferencia por conducción.", "Instrumentos para calcular el Factor K."] },
+        { n: 3, m: "Módulo 6: Gabinetes", q: "¿Gabinete familiar básico?", r: "Hermético, aislado con material incombustible y cierre magnético.", a: ["Con rejillas para equilibrar presiones.", "De cobre para transmitir calor por radiación.", "Sin aislamiento en la base para el motor."] },
+        { n: 3, m: "Módulo 6: Gabinetes", q: "¿Circulación de aire en heladera?", r: "Frío desciende por convección, absorbe calor, asciende y se enfría.", a: ["Por conducción directa en paredes metálicas.", "Impulsado por el pistón hacia la puerta.", "El condensador succiona calor con factor K."] },
+        { n: 3, m: "Módulo 6: Gabinetes", q: "¿Qué es el aislamiento?", r: "Barrera física para impedir la penetración del calor.", a: ["Vacío para quitar la humedad del gas.", "Separación entre bobinados del motor.", "Equilibrio de presiones en las paradas."] },
+        { n: 3, m: "Módulo 6: Gabinetes", q: "¿Factor K?", r: "Determina la conductividad térmica para calcular el espesor necesario.", a: ["Mide la corriente antes del protector térmico.", "Calcula la velocidad del refrigerante.", "Diferencia presiones de alta y baja."] },
+        { n: 3, m: "Módulo 6: Gabinetes", q: "¿Calor latente de fusión?", r: "Se usa si la temperatura del producto bajará del punto de congelación.", a: ["Cuando el pistón inicia la succión.", "Para elegir el diámetro del capilar.", "Cuando la alterna invierte el sentido."] }
+    ];
+
+    let nivel = 1, puntos = 0, vidas = 3, indice = 0, actualQ = [];
+    let rangoGlobal = "", mensajeGlobal = "", bonoFichas = 0, nombreGlobal = "";
+
+    function comenzar() {
+        document.getElementById('inicio').style.display = 'none';
+        document.getElementById('juego').style.display = 'block';
+        cargarNivel();
+    }
+
+    function cargarNivel() {
+        actualQ = DATA.filter(p => p.n === nivel).sort(() => 0.5 - Math.random()).slice(0, 5);
+        indice = 0;
+        document.getElementById('txt-nivel').innerText = "Nivel " + nivel;
+        mostrarPregunta();
+    }
+
+    function mostrarPregunta() {
+        let p = actualQ[indice];
+        document.getElementById('txt-modulo').innerText = p.m;
+        document.getElementById('txt-pregunta').innerText = p.q;
+        document.getElementById('dato-pregunta').innerText = (indice + 1) + "/5";
+        document.getElementById('dato-puntos').innerText = puntos + " 🪙";
+        document.getElementById('area-alerta').style.display = 'none';
+        document.getElementById('btn-next').style.display = 'none';
+
+        let progreso = ((nivel - 1) * 5 + indice) / 15 * 100;
+        document.getElementById('barra').style.width = progreso + "%";
+
+        let opciones = [...p.a, p.r].sort(() => 0.5 - Math.random());
+        let contenedor = document.getElementById('lista-opciones');
+        contenedor.innerHTML = '';
+
+        opciones.forEach(opt => {
+            let b = document.createElement('button');
+            b.className = 'btn-opcion';
+            b.innerText = opt;
+            b.onclick = () => validar(b, opt, p.r);
+            contenedor.appendChild(b);
+        });
+    }
+
+    function validar(boton, elegida, correcta) {
+        let btns = document.querySelectorAll('.btn-opcion');
+        btns.forEach(b => b.disabled = true);
+
+        if (elegida === correcta) {
+            boton.classList.add('correcta');
+            puntos += 10;
+            document.getElementById('area-alerta').innerText = "✔ CORRECTO: +10 Fichas agregadas.";
+        } else {
+            boton.classList.add('incorrecta');
+            btns.forEach(b => { if(b.innerText === correcta) b.classList.add('correcta'); });
+            vidas--;
+            document.getElementById('area-alerta').innerText = "❌ ERROR: El manual indica: " + correcta;
+        }
+
+        document.getElementById('dato-vidas').innerText = "❤❤专".slice(0, whitespaces(vidas)).padEnd(3, '🖤');
+        
+        // Función rápida interna para manejar las vidas visuales
+        function whitespaces(v) { return v < 0 ? 0 : v; }
+        document.getElementById('dato-vidas').innerText = "❤❤❤".slice(0, whitespaces(vidas)).padEnd(3, '🖤');
+
+        document.getElementById('area-alerta').style.display = 'block';
+        document.getElementById('btn-next').style.display = 'block';
+
+        if (vidas <= 0) setTimeout(abrirRegistro, 1000);
+    }
+
+    function proxima() {
+        indice++;
+        if (indice < 5) {
+            mostrarPregunta();
+        } else {
+            nivel++;
+            if (nivel <= 3) {
+                alert("Nivel Completado. Pasando al siguiente...");
+                cargarNivel();
+            } else {
+                abrirRegistro();
+            }
+        }
+    }
+
+    function abrirRegistro() {
+        if (vidas <= 0) { 
+            rangoGlobal = "Auditoría Fallida"; 
+            mensajeGlobal = "No se cumplen las competencias mínimas de seguridad en frío.";
+            bonoFichas = 0;
+        } else {
+            if (vidas === 3) bonoFichas = 50;
+            else if (vidas === 2) bonoFichas = 25;
+            else bonoFichas = 0;
+
+            puntos += bonoFichas;
+
+            if (puntos >= 150) { rangoGlobal = "Supervisor de Frío Central"; mensajeGlobal = "Dominio total de racks de compresión y eficiencia energética."; }
+            else if (puntos >= 100) { rangoGlobal = "Técnico Senior"; mensajeGlobal = "Capacidad validada para operar autónomamente en sucursales."; }
+            else { rangoGlobal = "Técnico Junior"; mensajeGlobal = "Examen aprobado. Se sugiere mentoría en sistemas electromecánicos."; }
+        }
+
+        document.getElementById('juego').style.display = 'none';
+        document.getElementById('pantalla-registro').style.display = 'block';
+    }
+
+    function guardarPuntaje() {
+        let nombre = document.getElementById('nombre-tecnico').value.trim();
+        if(nombre === "") {
+            alert("Por favor, ingresá tu nombre para registrar las fichas.");
+            return;
+        }
+
+        nombreGlobal = nombre;
+
+        let historial = JSON.parse(localStorage.getItem('rankingCarrefour')) || [];
+        historial.push({ nombre: nombre, rango: rangoGlobal, puntos: puntos });
+        historial.sort((a, b) => b.puntos - a.puntos);
+        localStorage.setItem('rankingCarrefour', JSON.stringify(historial));
+
+        document.getElementById('pantalla-registro').style.display = 'none';
+        document.getElementById('final').style.display = 'block';
+        
+        document.getElementById('final-rango').innerText = rangoGlobal;
+        document.getElementById('final-msj').innerText = mensajeGlobal;
+        document.getElementById('final-puntos').innerText = puntos + " 🪙";
+        
+        if (bonoFichas > 0) {
+            document.getElementById('bono-texto').innerText = `¡Incluye bono de +${bonoFichas} fichas por excelente margen de error!`;
+        } else {
+            document.getElementById('bono-texto').innerText = "";
+        }
+    }
+
+    function enviarWhatsApp() {
+        let textoMensaje = `*Carrefour Mantenimiento - Reporte de Auditoría Técnica*\n\n` +
+                           `• *Colaborador:* ${nombreGlobal}\n` +
+                           `• *Rango alcanzado:* ${rangoGlobal}\n` +
+                           `• *Fichas Acumuladas:* ${puntos} 🪙\n\n` +
+                           `_Reporte generado de forma automática por el sistema de simulación._`;
+        
+        let textoEncriptado = encodeURIComponent(textoMensaje);
+        let urlWhatsApp = `https://api.whatsapp.com/send?phone=${MI_TELEFONO}&text=${textoEncriptado}`;
+        window.open(urlWhatsApp, '_blank');
+    }
+
+    function verRanking() {
+        document.getElementById('inicio').style.display = 'none';
+        document.getElementById('ranking').style.display = 'block';
+        
+        let historial = JSON.parse(localStorage.getItem('rankingCarrefour')) || [];
+        let tabla = document.getElementById('tabla-cuerpo');
+        tabla.innerHTML = '';
+
+        if(historial.length === 0) {
+            tabla.innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--texto-secundario);">No hay registros aún en esta tienda.</td></tr>';
+        } else {
+            historial.forEach(reg => {
+                let fila = document.createElement('tr');
+                fila.innerHTML = `<td><strong>${reg.nombre}</strong></td><td>${reg.rango}</td><td style="color:var(--amarillo-ficha); font-weight:bold;">${reg.puntos} 🪙</td>`;
+                tabla.appendChild(fila);
+            });
+        }
+    }
+
+    function borrarHistorial() {
+        if(confirm("¿Estás seguro de que querés borrar todo el historial de puntajes de esta sucursal?")) {
+            localStorage.removeItem('rankingCarrefour');
+            verRanking();
+        }
+    }
+</script>
+</body>
+</html>

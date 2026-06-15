@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carrefour Mantenimiento - Snake Técnico Pro V2</title>
+    <style>
+        :root {
+            --azul-carrefour: #00387b;
+            --rojo-carrefour: #bb1e10;
+            --azul-claro: #f4f7fb;
+            --gris-borde: #e2e8f0;
+            --texto-principal: #1e293b;
+            --verde-whatsapp: #25d366;
+            --amarillo-ficha: #f59e0b;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
+        body { background-color: #f1f5f9; color: var(--texto-principal); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 10px; }
+        
+        .contenedor {
+            background: white; border-radius: 12px; max-width: 500px; width: 100%;
+            box-shadow: 0 10px 30px rgba(0, 56, 123, 0.15); border-top: 8px solid var(--azul-carrefour); overflow: hidden; text-align: center;
+        }
+
+        .header { background-color: var(--azul-claro); padding: 15px; border-bottom: 1px solid var(--gris-borde); display: flex; align-items: center; justify-content: space-between; font-weight: bold; color: var(--azul-carrefour); }
+        .tag { font-size: 0.75rem; background: var(--azul-carrefour); color: white; padding: 4px 10px; border-radius: 4px; text-transform: uppercase; }
+        
+        .cuerpo { padding: 20px; }
+        h1 { font-size: 1.4rem; color: var(--azul-carrefour); margin-bottom: 5px; }
+        h2 { font-size: 0.9rem; color: #64748b; margin-bottom: 15px; font-weight: normal; }
+
+        .marcador { display: flex; justify-content: space-around; background: #f8fafc; padding: 10px; border-radius: 8px; margin-bottom: 15px; border: 1px solid var(--gris-borde); font-weight: bold; font-size: 0.85rem; }
+        .fichas-color { color: var(--amarillo-ficha); }
+
+        .canvas-area {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin: 0 auto;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+
+        canvas { 
+            background-color: #1e293b; 
+            display: block; 
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 2; 
+        }
+
+        .logo-fondo {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 140px;
+            height: 140px;
+            z-index: 1; 
+            opacity: 0.12; 
+            pointer-events: none;
+            background: linear-gradient(135deg, var(--azul-carrefour) 50%, var(--rojo-carrefour) 50%);
+            border-radius: 25px;
+        }
+        .logo-fondo::after {
+            content: '';
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            width: 80px;
+            height: 80px;
+            background-color: #1e293b; 
+            border-radius: 12px;
+        }
+
+        .controles-celu { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; max-width: 180px; margin: 15px auto 0 auto; }
+        .btn-dir { background: var(--azul-carrefour); color: white; border: none; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1.2rem; }
+        .btn-dir:active { background: #002450; }
+
+        .btn-p { padding: 12px 24px; background: var(--azul-carrefour); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 15px; width: 100%; font-size: 1rem; }
+        .btn-wa { padding: 12px 24px; background: var(--verde-whatsapp); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; width: 100%; font-size: 1rem; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+        .input-r { padding: 10px; width: 100%; border: 2px solid var(--gris-borde); border-radius: 6px; margin-top: 10px; text-align: center; font-size: 1rem; }
+
+        .leyenda-item { display: flex; align-items: center; gap: 5px; margin-bottom: 4px; }
+    </style>
+</head>
+<body>
+
+<div class="contenedor">
+    <div class="header">
+        <div>Carrefour</div>
+        <div class="tag">Mantenimiento</div>
+    </div>
+
+    <div class="cuerpo">
+        <div id="pantalla-inicio">
+            <h1>Desafío Frío Extremo 🐍</h1>
+            <h2 style="margin-bottom: 10px;">Esquivá las fallas de sucursal y recolectá repuestos.</h2>
+            
+            <div style="text-align: left; background: #f8fafc; padding: 12px; border-radius: 8px; font-size: 0.8rem; margin-bottom: 15px; border-left: 4px solid var(--azul-carrefour);">
+                <p style="font-weight: bold; margin-bottom: 5px; color: var(--azul-carrefour);">🔧 REPUESTOS (Suman puntos y aceleran el motor):</p>
+                <div class="leyenda-item">⚡ <b>Presóstato:</b> +5 Fichas</div>
+                <div class="leyenda-item">🔩 <b>Filtro Deshidratador:</b> +10 Fichas</div>
+                <div class="leyenda-item">📐 <b>Válvula Termostática:</b> +15 Fichas</div>
+                <div class="leyenda-item">🚀 <b>Motocompresor:</b> +25 Fichas</div>
+                
+                <p style="font-weight: bold; margin-top: 10px; margin-bottom: 5px; color: var(--rojo-carrefour);">⚠️ FALLAS (Provocan Game Over):</p>
+                <div class="leyenda-item">🍎 Merma podrida | 🚪 Puerta abierta | 💧 Fuga de gas | ❌ Corte de luz</div>
+            </div>
+            <button class="btn-p" onclick="iniciarJuego()">¡Comenzar Desafío!</button>
+        </div>
+
+        <div id="pantalla-juego" style="display: none;">
+            <div class="marcador">
+                <div>Pieza: <span id="nombre-pieza" style="color:var(--azul-carrefour)">-</span></div>
+                <div>Motor: <span id="txt-velocidad" style="color:var(--rojo-carrefour)">900 RPM</span></div>
+                <div>Fichas: <span id="txt-fichas" class="fichas-color">0</span></div>
+            </div>
+            
+            <div class="canvas-area">
+                <div class="logo-fondo"></div>
+                <canvas id="canvasJuego" width="300" height="300"></canvas>
+            </div>
+            
+            <div class="controles-celu">
+                <td></td><button class="btn-dir" onclick="cambiarDireccion('UP')">▲</button><td></td>
+                <button class="btn-dir" onclick="cambiarDireccion('LEFT')">◀</button><td></td><button class="btn-dir" onclick="cambiarDireccion('RIGHT')">▶</button>
+                <td></td><button class="btn-dir" onclick="cambiarDireccion('DOWN')">▼</button><td></td>
+            </div>
+        </div>
+
+        <div id="pantalla-registro" style="display: none;">
+            <h1>Cadena de Frío Rota 🛑</h1>
+            <p style="color: #64748b; margin-top: 5px;">Ingresá tu nombre para confeccionar el reporte de mantenimiento.</p>
+            <input type="text" id="nombre-tecnico" class="input-r" placeholder="Nombre del Técnico" maxlength="15">
+            <button class="btn-p" onclick="guardarYFinalizar()">Verificar Reporte</button>
+        </div>
+
+        <div id="pantalla-final" style="display: none;">
+            <h1>Reporte Listo 📋</h1>
+            <div style="background: var(--azul-claro); padding: 15px; border-radius: 8px; margin: 15px 0; border: 1px solid var(--gris-borde);">
+                <p>Colaborador: <b id="res-nombre"></b></p>
+                <p>Fichas Logradas: <span id="res-fichas" class="fichas-color" style="font-weight: bold;"></span></p>
+            </div>
+            <button class="btn-wa" onclick="enviarReporteWA()">Enviar a Mantenimiento 💬</button>
+            <button class="btn-p" style="background:#cbd5e1; color:#1e293b;" onclick="location.reload()">Jugar de Nuevo</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const MI_TELEFONO = "5491137582285";
+    const canvas = document.getElementById("canvasJuego");
+    const ctx = canvas.getContext("2d");
+    const box = 15; 
+
+    let snake = [];
+    let itemActual = {};
+    let obstaculoActual = {};
+    let direccion = "";
+    let fichas = 0;
+    let nombreGlobal = "";
+    
+    // Variables de control de bucle manual (reemplaza a setInterval estático)
+    let ultimaActualizacion = 0;
+    let milisegundosPorPaso = 220; // Arranca lento (220ms por movimiento en vez de 130ms)
+    let juegoActivo = false;
+
+    const LISTA_PREMIOS = [
+        { icon: "⚡", name: "Presóstato", pts: 5 },
+        { icon: "🔩", name: "Filtro Deshidratador", pts: 10 },
+        { icon: "📐", name: "Válvula Termostática", pts: 15 },
+        { icon: "🚀", name: "Motocompresor", pts: 25 }
+    ];
+
+    const LISTA_OBSTACULOS = ["🍎", "🚪", "💧", "❌"];
+
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowUp" && direccion !== "DOWN") direccion = "UP";
+        if (e.key === "ArrowDown" && direccion !== "UP") direccion = "DOWN";
+        if (e.key === "ArrowLeft" && direccion !== "RIGHT") direccion = "LEFT";
+        if (e.key === "ArrowRight" && direccion !== "LEFT") direccion = "RIGHT";
+    });
+
+    function cambiarDireccion(dir) {
+        if (dir === "UP" && direccion !== "DOWN") direccion = "UP";
+        if (dir === "DOWN" && direccion !== "UP") direccion = "DOWN";
+        if (dir === "LEFT" && direccion !== "RIGHT") direccion = "LEFT";
+        if (dir === "RIGHT" && direccion !== "LEFT") direccion = "RIGHT";
+    }
+
+    function iniciarJuego() {
+        document.getElementById("pantalla-inicio").style.display = "none";
+        document.getElementById("pantalla-juego").style.display = "block";
+        
+        snake = [{ x: 10 * box, y: 10 * box }];
+        direccion = "RIGHT";
+        fichas = 0;
+        milisegundosPorPaso = 220; // Reset de velocidad inicial lenta
+        actualizarIndicadores();
+        
+        generarNuevosItems();
+        
+        juegoActivo = true;
+        ultimaActualizacion = performance.now();
+        requestAnimationFrame(buclePrincipal); // Usamos el refresco nativo del navegador
+    }
+
+    function actualizarIndicadores() {
+        document.getElementById("txt-fichas").innerText = fichas + " 🪙";
+        // Mapeo visual de milisegundos a RPM simuladas para darle el toque técnico
+        let rpm = Math.round(60000 / milisegundosPorPaso);
+        document.getElementById("txt-velocidad").innerText = rpm + " RPM";
+    }
+
+    function generarNuevosItems() {
+        let tipoPremio = LISTA_PREMIOS[Math.floor(Math.random() * LISTA_PREMIOS.length)];
+        let tipoObstaculo = LISTA_OBSTACULOS[Math.floor(Math.random() * LISTA_OBSTACULOS.length)];
+
+        itemActual = {
+            x: Math.floor(Math.random() * 20) * box,
+            y: Math.floor(Math.random() * 20) * box,
+            info: tipoPremio
+        };
+
+        obstaculoActual = {
+            x: Math.floor(Math.random() * 20) * box,
+            y: Math.floor(Math.random() * 20) * box,
+            icon: tipoObstaculo
+        };
+
+        if (itemActual.x === obstaculoActual.x && itemActual.y === obstaculoActual.y) {
+            generarNuevosItems();
+            return;
+        }
+
+        document.getElementById("nombre-pieza").innerText = `${tipoPremio.icon}`;
+    }
+
+    // Bucle dinámico para poder cambiar la velocidad en tiempo real
+    function buclePrincipal(tiempoActual) {
+        if (!juegoActivo) return;
+
+        requestAnimationFrame(buclePrincipal);
+
+        const delta = tiempoActual - ultimaActualizacion;
+        if (delta >= milisegundosPorPaso) {
+            ultimaActualizacion = tiempoActual - (delta % milisegundosPorPaso);
+            actualizarLogicaJuego();
+        }
+    }
+
+    function actualizarLogicaJuego() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Dibujar la serpiente
+        for (let i = 0; i < snake.length; i++) {
+            ctx.fillStyle = i === 0 ? "#00c4ff" : "#005ba3";
+            ctx.fillRect(snake[i].x, snake[i].y, box, box);
+            ctx.strokeStyle = "#1e293b";
+            ctx.strokeRect(snake[i].x, snake[i].y, box, box);
+        }
+
+        // Dibujar ítems
+        ctx.font = "12px Arial";
+        ctx.fillText(itemActual.info.icon, itemActual.x, itemActual.y + box - 2);
+        ctx.fillText(obstaculoActual.icon, obstaculoActual.x, obstaculoActual.y + box - 2);
+
+        let snakeX = snake[0].x;
+        let snakeY = snake[0].y;
+
+        if (direccion === "UP") snakeY -= box;
+        if (direccion === "DOWN") snakeY += box;
+        if (direccion === "LEFT") snakeX -= box;
+        if (direccion === "RIGHT") snakeX += box;
+
+        // Si come la pieza correcta
+        if (snakeX === itemActual.x && snakeY === itemActual.y) {
+            fichas += itemActual.info.pts;
+            
+            // INCREMENTO DE VELOCIDAD: Restamos milisegundos para que el próximo paso sea más rápido.
+            // Ponemos un tope máximo de velocidad (70ms) para que no sea imposible de jugar.
+            if (milisegundosPorPaso > 70) {
+                milisegundosPorPaso -= 12; // Se vuelve un cachito más rápido con cada pieza
+            }
+            
+            actualizarIndicadores();
+            generarNuevosItems();
+        } else {
+            snake.pop(); 
+        }
+
+        let nuevaCabeza = { x: snakeX, y: snakeY };
+
+        if (snakeX < 0 || snakeX >= canvas.width || snakeY < 0 || snakeY >= canvas.height || 
+            chequearChoque(nuevaCabeza, snake) || (snakeX === obstaculoActual.x && snakeY === obstaculoActual.y)) {
+            juegoActivo = false;
+            finalizarJuego();
+            return;
+        }
+
+        snake.unshift(nuevaCabeza);
+    }
+
+    function chequearChoque(cabeza, cuerpo) {
+        for (let i = 0; i < cuerpo.length; i++) {
+            if (cabeza.x === cuerpo[i].x && cabeza.y === cuerpo[i].y) return true;
+        }
+        return false;
+    }
+
+    function finalizarJuego() {
+        document.getElementById("pantalla-juego").style.display = "none";
+        document.getElementById("pantalla-registro").style.display = "block";
+    }
+
+    function guardarYFinalizar() {
+        let nombre = document.getElementById("nombre-tecnico").value.trim();
+        if (nombre === "") {
+            alert("Poné tu nombre para el reporte.");
+            return;
+        }
+        nombreGlobal = nombre;
+        document.getElementById("pantalla-registro").style.display = "none";
+        document.getElementById("pantalla-final").style.display = "block";
+        document.getElementById("res-nombre").innerText = nombreGlobal;
+        document.getElementById("res-fichas").innerText = fichas + " 🪙";
+    }
+
+    function enviarReporteWA() {
+        let mensaje = `*Carrefour Mantenimiento - Desafío Frío Extremo 🐍*\n\n` +
+                      `• *Colaborador:* ${nombreGlobal}\n` +
+                      `• *Fichas obtenidas:* ${fichas} 🪙\n\n` +
+                      `_¡Técnico operativo calificado en recolección de repuestos industriales!_`;
+        
+        let url = `https://api.whatsapp.com/send?phone=${MI_TELEFONO}&text=${encodeURIComponent(mensaje)}`;
+        window.open(url, '_blank');
+    }
+</script>
+</body>
+</html>
